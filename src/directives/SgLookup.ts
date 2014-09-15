@@ -57,6 +57,7 @@ module STAngular {
                             scope.loading = false;
                             scope.selectedIndex = 0;
                             scope.selected = null;
+                            scope.size = data.Items.length;
                         });
                     };
                     

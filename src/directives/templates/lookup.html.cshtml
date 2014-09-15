@@ -1,0 +1,28 @@
+﻿@using IdlDb.WebUI.Web
+
+<div class="input-group">
+    <input type="text" class="{{inputClass}}" ng-model="filterText" ng-required="ngRequired && !itemLoading" ng-readonly="ngReadonly"/>
+    <div class="input-group-addon opener" ng-click="reset()"><span class="fa fa-times"> </span></div>
+    <div class="input-group-addon opener" ng-click="open()">...</div>
+</div>
+<div class="dot-line input-loading" ng-show="itemLoading">
+    <div class="dot dot-1"></div>
+    <div class="dot dot-2"></div>
+    <div class="dot dot-3"></div>
+</div>
+
+<div class="lookup-list" ng-show="isOpen">
+    <table>
+        <tr><th ng-repeat="title in titleList" ng-bind="title"></th></tr>
+        <tr ng-click="setItem(item)" ng-repeat="item in data.Items" ng-class="{selected: selectedIndex === $index}">
+            <td ng-repeat="field in fieldList" ng-bind="item[field]"></td>
+        </tr>
+    </table>
+    <div class="lookup-footer" ng-show="data">{{size}} from {{data.TotalCount}} items visible</div>
+    <div class="lookup-footer" ng-hide="data">@R.Get("Type to search")</div>
+    <div class="dot-line" ng-show="loading">
+        <div class="dot dot-1"></div>
+        <div class="dot dot-2"></div>
+        <div class="dot dot-3"></div>
+    </div>
+</div>
