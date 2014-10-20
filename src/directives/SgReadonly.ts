@@ -14,7 +14,7 @@ module STAngular {
             link: (scope, elm, attrs, ctrl) => {
 
                 scope.$watch(attrs.sgReadonly, (value: boolean) => {
-                    var fields = elm.find('input[ng-model], select[ng-model], textarea[ng-model]');
+                    var fields = elm.find('input[ng-model], select[ng-model], textarea[ng-model]').not('[ng-disabled]');
                     toggleDisableAttr(fields, value);
                 });
 
