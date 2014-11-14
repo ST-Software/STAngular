@@ -37,7 +37,6 @@ module STAngular {
                     	pickadateHelper.bindPickadateForAngular(elm, utcDate, dateFormat, scope, ctrl, $parse);
                     }
                     var isDateValid = (value: Date): boolean => {
-
                         var isValid = true;
 
                         var min = attrs['min'] != null ? pickadateHelper.parseDateAttr(attrs['min'], scope, $parse, true) : null,
@@ -53,12 +52,6 @@ module STAngular {
 
                         return isValid;
                     }
-
-                    elm.bind('blur', event => {
-                        if (!modelValue) {
-                            ctrl.$setValidity(attrs.name, true);
-                        }
-                    });
 
                 function createRegexp(dateFormat: string): RegExp {
                         var supportedSeparators: Array<string> = ["/", "\\.", "-"]; //dot . must be escaped because it has special meaning in RegExp
