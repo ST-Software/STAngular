@@ -1,0 +1,13 @@
+
+<div>
+	<div class="input-group">
+		<input type="text" class="{{inputClass}}" ng-click="ngDisabled || open()" ng-model="selectedItemValue" ng-required="ngRequired" ng-readonly="ngReadonly" ng-disabled="ngDisabled" placeholder="{{placeholder}}" ng-class="{'ng-invalid': !sgSelectValid()}">
+		<div class="input-group-addon opener" ng-click="ngDisabled || reset()"><i class="fa fa-times"></i></div>
+		<div class="input-group-addon opener" ng-click="ngDisabled || open()"><i class="fa fa-chevron-down" style="color: black"></i></div>
+	</div>
+
+	<div class="sg-select-list" ng-show="isOpen">
+		<div ng-include="sgSelect"></div>
+	</div>
+</div>
+
