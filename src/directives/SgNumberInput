@@ -1,0 +1,137 @@
+/// <reference path="../../angular.d.ts" />
+/// <reference path="../Sg.ts" />
+
+module STAngular {
+
+    //Inspired by JsFiddle http://jsfiddle.net/KPeBD/2/ as seen in this Stackoverflow answer http://stackoverflow.com/a/19099610/552194
+    //refactored to use $parsers and $formatters instead of $render and listening for keyboard events
+    Module.directive('sgNumberInput', ['$filter', '$locale', ($filter, $locale: ng.ILocaleService) => {
+        return {
+            require: 'ngModel',
+            restrict: "A", //Should be used on INPUT elements only
+            link: ($scope: ng.IScope, element: JQuery, attrs, ctrl: ng.INgModelController) => {
+
+                var fractionSize = parseInt(attrs['fractionSize']) || 0;
+                var numberFilter : Function = $filter('number');
+                
+                //format the view value
+                ctrl.$formatters.push(modelValue => {
+                    var retVal : string = numberFilter(modelValue, fractionSize);
+
+                    var isValid: boolean = isNaN(modelValue) == false;
+                    ctrl.$setValidity(attrs.name, isValid);
+
+                    return retVal;
+                });
+
+                //parse user's input
+                ctrl.$parsers.push(viewValue => {
+                    var caretPosition: number = getCaretPosition(<HTMLInputElement>element[0]),
+                        nonNumericCount = countNonNumericChars(viewValue);
+
+                    viewValue = viewValue || '';
+
+                    //Replace all possible group separators
+                    var trimmedValue = viewValue.trim()
+                        .replace(/,/g, '')
+                        .replace(/`/g, '')
+                        .replace(/'/g, '') //de-ch
+                        .replace(/\u00a0/g, '') //fr-ch
+                        .replace(/ /g, '');
+
+                    //If numericValue contains more decimal places than is allowed by fractionSize, then numberFilter would round the value up
+                    //Thus 123.109 would become 123.11
+                    //We do not want that, therefore I strip the extra decimal numbers
+                    var separator = $locale.NUMBER_FORMATS.DECIMAL_SEP;
+                    var arr = trimmedValue.split(separator);
+                    var decimalPlaces = arr[1];
+                    if (decimalPlaces != null && decimalPlaces.length > fractionSize) {
+                        //Trim extra decimal places
+                        decimalPlaces = decimalPlaces.substring(0, fractionSize);
+                        trimmedValue = arr[0] + separator + decimalPlaces;
+                    }
+
+                    var numericValue : number = parseFloat(trimmedValue);
+                    var isEmpty : boolean = numericValue == null || viewValue.trim() === "";
+                    var isRequired: boolean = attrs.required || false;
+
+                    var isValid: boolean = true;
+                    if (isEmpty && isRequired) {
+                        isValid = false;
+                    }
+
+                    if (isEmpty == false && isNaN(numericValue)) {
+                        isValid = false;
+                    }
+
+                    ctrl.$setValidity(attrs.name, isValid);
+                    
+                    if (isNaN(numericValue) == false && isValid) {
+                        var newViewValue: string = numberFilter(numericValue, fractionSize);
+                        element.val(newViewValue);
+
+                        var newNonNumbericCount = countNonNumericChars(newViewValue);
+                        var diff = newNonNumbericCount - nonNumericCount;
+
+                        var newCaretPosition = caretPosition + diff;
+
+                        if (nonNumericCount == 0 && newCaretPosition > 0) {
+                            newCaretPosition--;
+                        }
+
+                        setCaretPosition(<HTMLInputElement>element[0], newCaretPosition);
+                    }
+
+                    return isNaN(numericValue) == false ? numericValue : null;
+                });
+            } //end of link function
+        }
+
+        //#region helper methods
+        function getCaretPosition(inputField: HTMLInputElement): number {
+            // Initialize
+            var position = 0;
+
+            // IE Support
+            if (document.selection) {
+                inputField.focus();
+
+                // To get cursor position, get empty selection range
+                var emptySelection = document.selection.createRange();
+
+                // Move selection start to 0 position
+                emptySelection.moveStart('character', -inputField.value.length);
+
+                // The caret position is selection length
+                position = emptySelection.text.length;
+            }
+            else if (inputField.selectionStart || inputField.selectionStart == 0) {
+                position = inputField.selectionStart;
+            }
+
+            return position;
+        }
+
+        function setCaretPosition(inputElement: HTMLInputElement, position: number) {
+            if (inputElement.createTextRange) {
+                var range = inputElement.createTextRange();
+                range.move('character', position);
+                range.select();
+            }
+            else {
+                if (inputElement.selectionStart) {
+                    inputElement.focus();
+                    inputElement.setSelectionRange(position, position);
+                } else {
+                    inputElement.focus();
+                }
+            }
+        }
+
+        function countNonNumericChars(value: string) : number {
+            return (value.match(/[^a-z0-9]/gi) || []).length;
+        }
+        //#endregion helper methods
+    }]);
+
+}
