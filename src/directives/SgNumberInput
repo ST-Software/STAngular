@@ -11,7 +11,7 @@ module STAngular {
             restrict: "A", //Should be used on INPUT elements only
             link: ($scope: ng.IScope, element: JQuery, attrs, ctrl: ng.INgModelController) => {
 
-                var fractionSize = parseInt(attrs['fractionSize']) || 0;
+                var fractionSize : number = parseInt(attrs['fractionSize']) || 0;
                 var numberFilter : Function = $filter('number');
                 
                 //format the view value
@@ -23,7 +23,7 @@ module STAngular {
 
                     return retVal;
                 });
-
+                
                 //parse user's input
                 ctrl.$parsers.push(viewValue => {
                     var caretPosition: number = getCaretPosition(<HTMLInputElement>element[0]),
@@ -66,9 +66,13 @@ module STAngular {
 
                     ctrl.$setValidity(attrs.name, isValid);
                     
+                    //Update the value in view
                     if (isNaN(numericValue) == false && isValid) {
                         var newViewValue: string = numberFilter(numericValue, fractionSize);
                         element.val(newViewValue);
+
+                        //The $viewValue might have different value then element.val(). This keeps them in sync.
+                        ctrl.$viewValue = newViewValue;
 
                         var newNonNumbericCount = countNonNumericChars(newViewValue);
                         var diff = newNonNumbericCount - nonNumericCount;
