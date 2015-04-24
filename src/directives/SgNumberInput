@@ -16,6 +16,10 @@ module STAngular {
                 
                 //format the view value
                 ctrl.$formatters.push(modelValue => {
+                    if (modelValue == null) {
+                        return null;
+                    }
+
                     var retVal : string = numberFilter(modelValue, fractionSize);
 
                     var isValid: boolean = isNaN(modelValue) == false;
