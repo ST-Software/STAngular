@@ -27,8 +27,9 @@ module STAngular {
                 var readFile = files => {
                     scope.$apply(() => { scope.fileSizeError = false; scope.fileTypeError = false; });
 
-                    if (files.length == 0)
+                    if (files.length == 0) {
                         return;
+                    }
 
                     var file = files[0];                    
 
@@ -50,9 +51,7 @@ module STAngular {
 
                     var regex = scope.fileTypeRegex || 'image.*';
                     var extRegex = scope.fileExtRegex;
-
-                    var parts : Array<string> = file.name.split('.');
-                    var extension : string = parts[parts.length - 1];
+                    var extension : string = getExtension(file);
 
                     if (!file.type.match(regex) && (extRegex == null || !extension.match(extRegex))) {
                         scope.$apply(() => {
@@ -71,6 +70,7 @@ module STAngular {
                             scope.document.Id = null; //We have new object => reset Id of the old one so that there is no confusion on the server
                             scope.document.DataUrl = (<any>event.target).result;
                             scope.document.ContentType = file.type;
+                            scope.document.Extension = getExtension(file);
 
                             if (scope.eventId) {
                                 $rootScope.$emit('sgFileBox.fileChanged_' + scope.eventId);
@@ -80,6 +80,12 @@ module STAngular {
                     };
                     reader.readAsDataURL(file);
                 };
+
+                function getExtension(file: File) : string {
+                    var parts: Array<string> = file.name.split('.');
+                    var extension: string = parts[parts.length - 1];
+                    return extension;
+                }
 
                 scope.isNotEmpty = () => {
                     return scope.document && scope.document.ContentType;
@@ -101,12 +107,24 @@ module STAngular {
                     return scope.document && scope.document.ContentType && scope.document.ContentType.indexOf('spreadsheet') != -1;
                 }
 
+                scope.isWord = () => {
+                    return scope.document && scope.document.ContentType && (
+                        scope.document.ContentType.indexOf('application/vnd.openxmlformats-officedocument.wordprocessingml.document') != -1 //docx
+                        || scope.document.ContentType.indexOf('application/msword') != -1 //doc
+                        );
+                }
+
                 scope.isXml = () => {
                     return scope.document && scope.document.ContentType && scope.document.ContentType.indexOf('text/xml') != -1;
                 }
 
                 scope.isEmailFile = () => {
-                    return scope.document && scope.document.ContentType && scope.document.ContentType.indexOf('message/rfc822') != -1;
+                    return scope.document && (
+                        scope.document.ContentType && scope.document.ContentType.indexOf('message/rfc822') != -1
+                        //Emails saved from MS Outlook do not have content type but they have .msg extension.
+                        //Emails save from Thunderbird have correct content type (and the extension is .eml)
+                        || scope.document.ContentType == '' && scope.document.Extension == 'msg'
+                        );
                 }
 
                 scope.clear = () => {
