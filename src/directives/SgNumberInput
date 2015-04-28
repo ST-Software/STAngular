@@ -136,7 +136,9 @@ module STAngular {
             }
         }
 
-        function countNonNumericChars(value: string) : number {
+        function countNonNumericChars(value: string): number {
+            //ignore the minus sign (otherwise caret might jump to wrong position)
+            value = value.replace("-", "");
             return (value.match(/[^a-z0-9]/gi) || []).length;
         }
         //#endregion helper methods
