@@ -1,0 +1,55 @@
+/// <reference path="../../angular.d.ts" />
+/// <reference path="../Sg.ts" />
+
+module STAngular {
+
+    //Directive to disable options in ng-options
+    //Code taken from http://jsfiddle.net/dZDLg/46/ and rewritten to TypeScript
+    //There is an GitHub ticket for this issue - see https://github.com/angular/angular.js/issues/638
+    //Discussion on StackOverflow - http://stackoverflow.com/questions/16202254/ng-options-with-disabled-rows/20790905#20790905
+
+    //this version does not support GroupBy (but we did not need it, so it is ok)
+    //If you need to support groupby then see the Stackoverflow discussion above
+
+    //This should be solved by Angular 1.4
+
+    Module.directive('sgOptionsDisabled', $parse => {
+        var disableOptions = (scope, attr, element, data, fnDisableIfTrue) => {
+            // refresh the disabled options in the select element.
+            var containsEmptyOption : boolean = element.find("option[value='']").length != 0;
+
+            angular.forEach(element.find("option"), (value, index) => {
+                var elem = angular.element(value);
+                if (elem.val() != "") {
+                    var locals = {};
+
+                     //ST-Software modification (index-1 because of the initial empty option)
+                    var i: number = containsEmptyOption ? index - 1 : index;
+
+                    locals[attr] = data[i];
+                    elem.attr("disabled", fnDisableIfTrue(scope, locals));
+                }
+            });
+        };
+        return {
+            priority: 0,
+            require: 'ngModel',
+            link: (scope, iElement, iAttrs, ctrl) => {
+                // parse expression and build array of disabled options
+                var expElements = iAttrs.sgOptionsDisabled.match(/^\s*(.+)\s+for\s+(.+)\s+in\s+(.+)?\s*/);
+                var attrToWatch = expElements[3];
+                var fnDisableIfTrue = $parse(expElements[1]);
+                scope.$watch(attrToWatch, (newValue, oldValue) => {
+                    if (newValue)
+                        disableOptions(scope, expElements[2], iElement, newValue, fnDisableIfTrue);
+                }, true);
+                // handle model updates properly
+                scope.$watch(iAttrs.ngModel, (newValue, oldValue) => {
+                    var disOptions = $parse(attrToWatch)(scope);
+                    if (newValue)
+                        disableOptions(scope, expElements[2], iElement, disOptions, fnDisableIfTrue);
+                });
+            }
+        };
+    });
+}
