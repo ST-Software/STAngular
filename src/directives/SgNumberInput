@@ -1,0 +1,108 @@
+/// <reference path="../../angular.d.ts" />
+/// <reference path="../Sg.ts" />
+
+module STAngular {
+
+    //Format input according to current locale when user leaves input field
+    //Unformat when field recieves focus
+    //Example: user types 1234567989 which automatically becomes 123`456`789.00 on blur
+    
+    //Inspired by SgNumberInputAutoformat
+    Module.directive('sgNumberInput', ['$filter', '$locale', ($filter: ng.IFilterService, $locale: ng.ILocaleService) => {
+        return {
+            require: 'ngModel',
+            restrict: "A", //Should be used on INPUT elements only
+            link: ($scope: ng.IScope, element: JQuery, attrs, ctrl: ng.INgModelController) => {
+
+                var fractionSize : number = parseInt(attrs['fractionSize']) || 0;
+                var numberFilter : Function = $filter('number');
+                
+                element.bind('blur', onBlurHandler);
+                element.bind('focus', onFocusHandler);
+
+                function removeListeners() {
+                    element.unbind('blur', onBlurHandler);
+                    element.unbind('focus', onFocusHandler);
+                }
+
+                //Dont forget to destroy listeners to avoid memory leaks !
+                element.on('$destroy', removeListeners);
+                
+                // This runs when the model gets updated on the scope directly and keeps our view in sync
+                ctrl.$render = () => {
+                    var retVal: string = numberFilter(ctrl.$modelValue, fractionSize);
+                    element.val(retVal);
+                }
+
+                //parse user value
+                ctrl.$parsers.push(function (data: string) {
+                    //normalize input value
+                    data = data || '';
+                    data = data.replace(',', '.');
+
+                    console.log('zlo', data);
+
+                    var parsed : number = parseFloat(data);
+                    return !isNaN(parsed) ? parsed : undefined;
+                });
+
+                //format input value
+                ctrl.$formatters.push(function (data) {
+                    return data != null && data != NaN ? numberFilter(data, fractionSize) : null; //converted
+                });
+
+                function onBlurHandler() {
+                    if (ctrl.$modelValue == null) {
+                        ctrl.$viewValue = null;
+                    }
+                    
+                    //Strip decimals after fractionSize
+                    ctrl.$modelValue = sanitizeDecimals(!!ctrl.$modelValue ? ctrl.$modelValue.toString() : '');
+                    var isModelNotANumber: boolean = isNaN(ctrl.$modelValue);
+
+                    var retVal: string = !isModelNotANumber ? numberFilter(ctrl.$modelValue, fractionSize) : null;
+
+                    if (isModelNotANumber) {
+                        ctrl.$viewValue = null;
+                        ctrl.$modelValue = null;
+                    }
+
+                    var isValid: boolean = isModelNotANumber == false;
+                    ctrl.$setValidity(attrs.name, isValid);
+
+                    ctrl.$viewValue = retVal;
+                    ctrl.$render();
+                }
+
+                //remove formatting
+                function onFocusHandler() {
+                    var value = ctrl.$modelValue;
+                    ctrl.$viewValue = value;
+                    element.val(value);
+                }
+
+                function sanitizeDecimals(value: string) : number {
+                    //If numericValue contains more decimal places than is allowed by fractionSize, then numberFilter would round the value up
+                    //Thus 123.109 would become 123.11
+                    //We do not want that, therefore I strip the extra decimal numbers
+
+                    var separator = $locale.NUMBER_FORMATS.DECIMAL_SEP;
+
+                    var arr = value.split(separator);
+                    var decimalPlaces = arr[1];
+                    if (decimalPlaces != null && decimalPlaces.length > fractionSize) {
+                        //Trim extra decimal places
+                        decimalPlaces = decimalPlaces.substring(0, fractionSize);
+                        value = arr[0] + separator + decimalPlaces;
+                    }
+
+                    var numericValue: number = parseFloat(value);
+
+                    return numericValue;
+                }
+            } //end of link function
+        }
+        
+    }]);
+
+}
