@@ -3,9 +3,12 @@
 
 module STAngular {
 
+    //Automatically format input according to current locale.
+    //Example: user types 1234567989 which automatically becomes 123`456`789.00
+
     //Inspired by JsFiddle http://jsfiddle.net/KPeBD/2/ as seen in this Stackoverflow answer http://stackoverflow.com/a/19099610/552194
     //refactored to use $parsers and $formatters instead of $render and listening for keyboard events
-    Module.directive('sgNumberInput', ['$filter', '$locale', ($filter, $locale: ng.ILocaleService) => {
+    Module.directive('sgNumberInputAutoformat', ['$filter', '$locale', ($filter, $locale: ng.ILocaleService) => {
         return {
             require: 'ngModel',
             restrict: "A", //Should be used on INPUT elements only
