@@ -84,7 +84,7 @@ module STAngular {
                 function getExtension(file: File) : string {
                     var parts: Array<string> = file.name.split('.');
                     var extension: string = parts[parts.length - 1];
-                    return extension;
+                    return !!extension ? extension.toLowerCase() : undefined;
                 }
 
                 scope.isNotEmpty = () => {
