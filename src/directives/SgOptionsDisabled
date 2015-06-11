@@ -13,7 +13,7 @@ module STAngular {
 
     //This should be solved by Angular 1.4
 
-    Module.directive('sgOptionsDisabled', $parse => {
+    Module.directive('sgOptionsDisabled', ['$parse', $parse => {
         var disableOptions = (scope, attr, element, data, fnDisableIfTrue) => {
             // refresh the disabled options in the select element.
             var containsEmptyOption : boolean = element.find("option[value='']").length != 0;
@@ -23,7 +23,7 @@ module STAngular {
                 if (elem.val() != "") {
                     var locals = {};
 
-                     //ST-Software modification (index-1 because of the initial empty option)
+                    //ST-Software modification (index-1 because of the initial empty option)
                     var i: number = containsEmptyOption ? index - 1 : index;
 
                     locals[attr] = data[i];
@@ -51,5 +51,5 @@ module STAngular {
                 });
             }
         };
-    });
+    }]);
 }
