@@ -1,51 +1,56 @@
-/// <reference path="../../angular.d.ts" />
-/// <reference path="../Sg.ts" />
+module FinaDb
+{
 
-module STAngular {
+    interface ISgSelectOption {
+        Id: string;
+        Name: string;
+        Readonly?: boolean;
+    }
 
-  // http://plnkr.co/edit/Vu3KyTtTav9cSQSJYbHb?p=preview
-  Module.directive("sgSelect", ["$parse",
-		($parse) =>
-	{
+	// http://plnkr.co/edit/Vu3KyTtTav9cSQSJYbHb?p=preview
+	GlobalModule.directive("sgSelect", ["$parse", "$filter",
+		($parse, $filter) => {
+		    var defaultTableWidth = 400;
+
 		return {
 			restrict: "A",
 			scope: {
 				sgSelect: "@",
 				sgSelectOriginalOptions: "=sgSelectOptions",
-				sgSelectOptionsReadonly: "@",
+				sgSelectOptionsReadonly: "=",
 				sgSelectValid: "&",
-				sgSelectInitialValue: "=",
-				ngModel: "@",
+                sgSelectInitialValue: "=",
+                tableWidth: "@",
+				//ngModel: "@",
+				ngModel: "=",
 				ngDisabled: "=",
 				ngRequired: "=",
 				display: "@",
 				ngReadOnly: "=",
 				placeholder: "@",
 				parentScopeLevel: "@",
-        inputClass: "@",
 			},
 			templateUrl: "../directive/SgSelect.html",
-			link: (scope, elm, attrs, ctrl) => {
+            link: (scope, elm, attrs, ctrl) => {
+                
+                if (scope.tableWidth == null) {
+                    scope.tableWidth = defaultTableWidth;
+                }
+
 				if (!scope.parentScopeLevel) scope.parentScopeLevel = 1;
-
-				var modelGet = $parse(scope.ngModel),
-					modelSet = modelGet.assign;
-
-				var getParentScope = () => {
-					var parentScope = scope.$parent;
-					for (var i = 2; i <= scope.parentScopeLevel; i++) {
-						parentScope = parentScope.$parent;
-					}
-					return parentScope;
-				}
-
+                
 				scope.$watch('sgSelectOriginalOptions', () => {
-					scope.sgSelectOptions = angular.copy(scope.sgSelectOriginalOptions);
-					if (scope.sgSelectOptionsReadonly)
-					{
-						scope.sgSelectOptions = getParentScope()[scope.sgSelectOptionsReadonly](scope.sgSelectOptions, scope.sgSelectInitialValue);
-					}
+				    scope.sgSelectOptions = getSelectOptions();
 				});
+
+                function getSelectOptions(): Array<ISgSelectOption> {
+                    var sgSelectOptions = angular.copy(scope.sgSelectOriginalOptions);
+                    if (angular.isFunction(scope.sgSelectOptionsReadonly)) {
+                        sgSelectOptions = scope.sgSelectOptionsReadonly(sgSelectOptions, scope.sgSelectInitialValue);
+                    }
+
+                    return sgSelectOptions;
+                }
 
 				var setItem = (item) => {
 					if (item) {
@@ -55,18 +60,19 @@ module STAngular {
 						scope.selectedId = null;
 						scope.selectedItemValue = null;
 					}
-					modelSet(getParentScope(), scope.selectedId);
+
+				    scope.ngModel = scope.selectedId;
 				};
 
 				var updateSelectedId = () => {
-					var selectedId = modelGet(getParentScope());
+					var selectedId = scope.ngModel;
+
 					var item = _.find(scope.sgSelectOptions, (i: any) => { return i.Id == selectedId; });
 					if (item) {
 						setItem(item);
 					}
 				};
 
-				getParentScope().$watch(scope.ngModel, () => updateSelectedId());
 				updateSelectedId();
 
 				var resetItem = () => {
@@ -113,8 +119,23 @@ module STAngular {
 
 				scope.$watch('sgSelectOptions', () => updateSelectedId());
 
-				//inputElm.keydown((e: KeyboardEvent) => {
-				//	scope.$apply(() => {
+                scope.$watch('selectedItemValue', (newValue: string, oldValue: string) => {
+                    if (newValue == oldValue) {
+                        return;
+                    }
+
+                    if (!!scope.selectedItemValue) {
+                        var options = getSelectOptions();
+                        options = $filter('filter')(options, { Name: scope.selectedItemValue });
+                        scope.sgSelectOptions = options;
+                    } else {
+                        scope.sgSelectOptions = getSelectOptions();
+                    }
+                });
+
+
+                //TODO: Commited out because of difficulty skipping the disabled elements/options in the list
+                //scope.$apply(() => {
 				//		if (scope.isOpen)
 				//		{
 				//			if (e.keyCode == 27) // space
@@ -163,4 +184,4 @@ module STAngular {
 			}
 		};
 	}]);
-}
+} 
