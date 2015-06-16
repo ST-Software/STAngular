@@ -29,15 +29,32 @@ module STAngular {
             link: function postLink(scope, element, attrs) {
                 // Could have custom or boostrap modal options here
                 var popupOptions = {};
-                element.bind("click", function () {
+                element.bind("click", (event: Event) => {
                     popupService.confirm(attrs["title"], attrs["actionText"],
-                            attrs["actionButtonText"], attrs["actionFunction"],
-                            attrs["cancelButtonText"], attrs["cancelFunction"],
-                            scope, popupOptions);
+                        attrs["actionButtonText"], attrs["actionFunction"],
+                        attrs["cancelButtonText"], attrs["cancelFunction"],
+                        scope, popupOptions);
                 });
             }
         };
+    }]);
 
+
+    Module.directive("sgPrompt", [<any>"PopupService", function (popupService: PopupService) {
+        return {
+            restrict: "AE",
+            link: function postLink(scope, element, attrs) {
+                // Could have custom or boostrap modal options here
+                var placeholder = attrs["sgPromptPlaceholder"];
+                var popupOptions = {placeholder : placeholder};
+                element.bind("click", function () {
+                    popupService.prompt(attrs["title"], attrs["actionText"],
+                        attrs["actionButtonText"], attrs["actionFunction"],
+                        attrs["cancelButtonText"], attrs["cancelFunction"],
+                        scope, popupOptions);
+                });
+            }
+        };
     }]);
 
     Module.directive("sgAlert", [<any>"PopupService", function (popupService: PopupService) {
@@ -45,7 +62,7 @@ module STAngular {
             restrict: "AE",
             link: function postLink(scope, element, attrs) {
                 // Could have custom or boostrap modal options here
-                var popupOptions = {};
+                var popupOptions = { };
                 element.bind("click", function () {
                     popupService.alert(attrs["title"], attrs["text"],
                             attrs["buttonText"], attrs["alertFunction"],
@@ -53,7 +70,6 @@ module STAngular {
                 });
             }
         };
-
     }]);
 
     export class PopupService {
@@ -75,7 +91,7 @@ module STAngular {
                 this.popupContent = $('<div class="modal-content"></div>');
                 this.popupContent.appendTo(dialog);
 
-                this.popupElement = $('<div class="modal fade"></div>');
+                this.popupElement = $('<div class="modal fade" tabindex="-1"></div>');
                 dialog.appendTo(this.popupElement);
 
                 this.popupElement.appendTo('body');
@@ -169,6 +185,70 @@ module STAngular {
                 popup.find(".btn-cancel").click(() => {
                     this.close();
                 });
+            //}
+                this.compileAndRunPopup(popup, scope, options);
+
+                popup.on('keydown',(event: KeyboardEvent) => {
+                    //TODO: Extract keyCodes to angular service (constant) and upload on Github
+                    //they are already used in SgLookups
+                    if (event.keyCode == 13) {
+                        popup.find(".btn-primary").trigger('click');
+                    }
+            });
+
+        }
+
+
+        // Is it ok to have the html here? should all this go in the directives? Is there another way
+        // get the html out of here?
+        prompt(title: string, actionText: string, actionButtonText: string, actionFunction: string, cancelButtonText: string, cancelFunction: string, scope, options) {
+            actionText = (actionText) ? actionText : "Are you sure?";
+            actionButtonText = (actionButtonText) ? actionButtonText : "Ok";
+            cancelButtonText = (cancelButtonText) ? cancelButtonText : "Cancel";
+
+            var popup = this.getPopup(true);
+            var popupContent = this.getPopupContent(popup);
+
+            var confirmHtml: string = "";
+
+            var placeholder = options.placeholder;
+
+            if (title) {
+                confirmHtml += "<div class=\"modal-header\"><h1>" + title + "</h1></div>";
+            }
+
+            confirmHtml += "<div class=\"modal-body\">" + actionText + "</div>"
+            + "<textarea placeholder=\"" + placeholder + "\" ng-model=\"message\"></textarea>"
+            + "<strong ng-bind=\"message\"></strong>" //test
+            + "<div class=\"modal-footer\">";
+
+            if (actionFunction) {
+                confirmHtml += "<button class=\"btn btn-primary\" ng-click=\"" + actionFunction + "\">" + actionButtonText + "</button>";
+            }
+            else {
+                confirmHtml += "<button class=\"btn btn-primary\">" + actionButtonText + "</button>";
+            }
+
+            if (cancelFunction) {
+                confirmHtml += "<button class=\"btn btn-cancel\" ng-click=\"" + cancelFunction + "\">" + cancelButtonText + "</button>";
+            }
+            else {
+                confirmHtml += "<button class=\"btn btn-cancel\">" + cancelButtonText + "</button>";
+            }
+            confirmHtml += "</div>";
+
+            //popup.html(confirmHtml);
+            popupContent.html(confirmHtml);
+
+            //if (!actionFunction) {
+            popup.find(".btn-primary").click(() => {
+                this.close();
+            });
+            //}
+            //if (!cancelFunction) {
+            popup.find(".btn-cancel").click(() => {
+                this.close();
+            });
             //}
             this.compileAndRunPopup(popup, scope, options);
         }
