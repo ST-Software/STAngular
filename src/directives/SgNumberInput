@@ -39,7 +39,7 @@ module STAngular {
                     //normalize input value
                     data = data || '';
                     data = data.replace(',', '.');
-
+                    
                     var parsed : number = parseFloat(data);
                     return !isNaN(parsed) ? parsed : undefined;
                 });
@@ -55,7 +55,7 @@ module STAngular {
                     }
                     
                     //Strip decimals after fractionSize
-                    ctrl.$modelValue = sanitizeDecimals(!!ctrl.$modelValue ? ctrl.$modelValue.toString() : '');
+                    ctrl.$modelValue = sanitizeDecimals(ctrl.$modelValue != null && ctrl.$modelValue !== '' ? ctrl.$modelValue.toString() : '');
                     var isModelNotANumber: boolean = isNaN(ctrl.$modelValue);
 
                     var retVal: string = !isModelNotANumber ? numberFilter(ctrl.$modelValue, fractionSize) : null;
