@@ -40,8 +40,6 @@ module STAngular {
                     data = data || '';
                     data = data.replace(',', '.');
 
-                    console.log('zlo', data);
-
                     var parsed : number = parseFloat(data);
                     return !isNaN(parsed) ? parsed : undefined;
                 });
