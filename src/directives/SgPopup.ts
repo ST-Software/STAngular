@@ -188,7 +188,10 @@ module STAngular {
             //}
                 this.compileAndRunPopup(popup, scope, options);
 
-                popup.on('keydown',(event: KeyboardEvent) => {
+                //Destroy previous event listeners
+                popup.off('keydown.sgPopup');
+
+                popup.on('keydown.sgPopup',(event: KeyboardEvent) => {
                     //TODO: Extract keyCodes to angular service (constant) and upload on Github
                     //they are already used in SgLookups
                     if (event.keyCode == 13) {
