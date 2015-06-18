@@ -15,14 +15,16 @@
         {{fileTypeDescription}}
     </div>
 
-    <img class="image-selector" ng-class="{'readonly': readonly}" ng-src="{{document.DataUrl}}" ng-show="isImage()" />
-    <img class="image-selector file-icon" ng-class="{'readonly': readonly}" src="~/Content/images/file_pdf.png" ng-show="isPdf()" />
-    <img class="image-selector file-icon" ng-class="{'readonly': readonly}" src="~/Content/images/file_audio.png" ng-show="isAudio()" />
-    <img class="image-selector file-icon" ng-class="{'readonly': readonly}" src="~/Content/images/file_email.png" ng-show="isEmailFile()" />
+    <img class="image-selector" ng-class="{'readonly': readonly}" ng-src="{{document.DataUrl}}" ng-if="isImage()" />
+    <img class="image-selector file-icon" ng-class="{'readonly': readonly}" src="~/Content/images/file_pdf.png" ng-if="isPdf()" />
+    <img class="image-selector file-icon" ng-class="{'readonly': readonly}" src="~/Content/images/file_word.png" ng-if="isWord()" />
+    <img class="image-selector file-icon" ng-class="{'readonly': readonly}" src="~/Content/images/file_audio.png" ng-if="isAudio()" />
+    <img class="image-selector file-icon" ng-class="{'readonly': readonly}" src="~/Content/images/file_email.png" ng-if="isEmailFile()" />
 
     <div ng-hide="isImage()"></div>
 
-    <div class="placeholder image-selector" ng-class="{'readonly': readonly}" ng-hide="fileSizeError || fileTypeError || isImage() || isPdf() || isAudio()">
+    <div class="placeholder image-selector" ng-class="{'readonly': readonly}" 
+         ng-hide="fileSizeError || fileTypeError || isImage() || isPdf() || isWord() || isAudio() || isEmailFile()">
         <div>{{fileTypeDescription}}</div>
         <div class="drag-and-drop">@R.Get("Click or Drag & Drop")</div>
     </div>
@@ -34,7 +36,8 @@
             <i class="fa fa-download"></i>
         </a>
         
-        <a class="btn" ng-href="{{document.PreviewUrl}}" ng-show="document.Url" target="_blank" bs-tooltip data-original-title="@R.Get("Open in new window")">
+        <a class="btn" ng-href="{{document.PreviewUrl}}" ng-show="document.Url" target="_blank" 
+           bs-tooltip data-original-title="@R.Get("Open in new window")" data-target="body">
             <i class="fa fa-eye"></i>
         </a>
 
