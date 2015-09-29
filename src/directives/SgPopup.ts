@@ -120,10 +120,10 @@ module STAngular {
             alertHtml += "<div class=\"modal-body\">" + text + "</div>"
                         + "<div class=\"modal-footer\">";
             if (alertFunction) {
-                alertHtml += "<button class=\"btn\" ng-click=\"" + alertFunction + "\">" + buttonText + "</button>";
+                alertHtml += "<button class=\"btn\" ng-click=\"" + alertFunction + "\" type=\"button\">" + buttonText + "</button>";
             }
             else {
-                alertHtml += "<button class=\"btn\">" + buttonText + "</button>";
+                alertHtml += "<button class=\"btn\" type=\"button\">" + buttonText + "</button>";
             }
             alertHtml += "</div>";
 
@@ -160,16 +160,16 @@ module STAngular {
             confirmHtml += "<div class=\"modal-body\">" + actionText + "</div>"
                         + "<div class=\"modal-footer\">";
             if (actionFunction) {
-                confirmHtml += "<button class=\"btn btn-primary\" ng-click=\"" + actionFunction + "\">" + actionButtonText + "</button>";
+                confirmHtml += "<button class=\"btn btn-primary\" ng-click=\"" + actionFunction + "\" type=\"button\">" + actionButtonText + "</button>";
             }
             else {
-                confirmHtml += "<button class=\"btn btn-primary\">" + actionButtonText + "</button>";
+                confirmHtml += "<button class=\"btn btn-primary\" type=\"button\">" + actionButtonText + "</button>";
             }
             if (cancelFunction) {
-                confirmHtml += "<button class=\"btn btn-cancel\" ng-click=\"" + cancelFunction + "\">" + cancelButtonText + "</button>";
+                confirmHtml += "<button class=\"btn btn-cancel\" ng-click=\"" + cancelFunction + "\" type=\"button\">" + cancelButtonText + "</button>";
             }
             else {
-                confirmHtml += "<button class=\"btn btn-cancel\">" + cancelButtonText + "</button>";
+                confirmHtml += "<button class=\"btn btn-cancel\" type=\"button\">" + cancelButtonText + "</button>";
             }
             confirmHtml += "</div>";
 
@@ -226,17 +226,17 @@ module STAngular {
             + "<div class=\"modal-footer\">";
 
             if (actionFunction) {
-                confirmHtml += "<button class=\"btn btn-primary\" ng-click=\"" + actionFunction + "\">" + actionButtonText + "</button>";
+                confirmHtml += "<button class=\"btn btn-primary\" ng-click=\"" + actionFunction + "\" type=\"button\">" + actionButtonText + "</button>";
             }
             else {
-                confirmHtml += "<button class=\"btn btn-primary\">" + actionButtonText + "</button>";
+                confirmHtml += "<button class=\"btn btn-primary\" type=\"button\">" + actionButtonText + "</button>";
             }
 
             if (cancelFunction) {
-                confirmHtml += "<button class=\"btn btn-cancel\" ng-click=\"" + cancelFunction + "\">" + cancelButtonText + "</button>";
+                confirmHtml += "<button class=\"btn btn-cancel\" ng-click=\"" + cancelFunction + "\" type=\"button\">" + cancelButtonText + "</button>";
             }
             else {
-                confirmHtml += "<button class=\"btn btn-cancel\">" + cancelButtonText + "</button>";
+                confirmHtml += "<button class=\"btn btn-cancel\" type=\"button\">" + cancelButtonText + "</button>";
             }
             confirmHtml += "</div>";
 
@@ -258,7 +258,7 @@ module STAngular {
 
         // Loads the popup
         load(url, scope, options) {
-            var htmlPage = '<div class="modal-header"><h1>Header</h1></div><div class="modal-body">Body</div><div class="modal-footer"><button class="btn btn-primary" ng-click="doIt()">Do it</button><button class="btn btn-cancel" ng-click="cancel()">Cancel</button></div>';
+            var htmlPage = '<div class="modal-header"><h1>Header</h1></div><div class="modal-body">Body</div><div class="modal-footer"><button class="btn btn-primary" ng-click="doIt()" type="button">Do it</button><button class="btn btn-cancel" ng-click="cancel()" type="button">Cancel</button></div>';
 
             this.$http.get(url).success(function (data) {
                 var popup = this.getPopup(true);
