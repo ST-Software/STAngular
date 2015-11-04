@@ -1,6 +1,9 @@
 /// <reference path="../../angular.d.ts" />
 /// <reference path="../Sg.ts" />
 
+//TODO: When fields is empty and user starts typing letters, then these letters are shown. But only numbers are valid
+//TODO: When user quickly types several times the same letter, then it sometimes shows up in the input field
+
 module STAngular {
 
     //Automatically format input according to current locale.
